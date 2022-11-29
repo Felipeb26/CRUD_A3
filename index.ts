@@ -1,11 +1,16 @@
 require("dotenv").config()
-import {app} from "./middle"
+import {app} from "./src/middle"
 
 const port = process.env.PORT || 3000;
 
 const server = app.listen(port, () => {
     console.log(`CRUD rodando em http://localhost:${port}`)
 })
+
+app.get("/", async(req:any,res:any)=>{
+    return res.send("deploy deu certo!")
+})
+
 
 process.on("SIGINT", () =>{
     server.close();
