@@ -1,7 +1,6 @@
 {
     "name": "back-a3",
     "version": 2,
-    "public": true,
     "build": {
         "src": "./dist/src/server.js",
         "use": "@vercel/node"
