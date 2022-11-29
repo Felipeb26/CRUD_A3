@@ -1,0 +1,308 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Api crud firebase",
+        "description": "Api comm crud de conexao com banco de dados firebase",
+        "termsOfService": "http://localhost:3000/terms",
+        "contact": {
+            "email": "felipeb2silva@gmail.com",
+            "name": "felipe Batista da silva"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000/",
+            "description": "api crud"
+        }
+    ],
+    "paths": {
+        "/login": {
+            "post": {
+                "summary": "Requisicao para acesso",
+                "description": "faz o login devolvendo token bearer",
+                "tags": ["Login"],
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            },
+                            "examples": {
+                                "login": {
+                                    "value": {
+                                        "nome": "meu nome é",
+                                        "email": "email@gmail.com.br"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "500": {
+                        "description": "server error",
+                        "message": "tirar print e enviar no email acima!"
+                    },
+                    "401": { "description": "unathorized" },
+                    "400": { "description": "Bad Request" },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/consultas": {
+            "get": {
+                "description": "traz as consultas",
+                "summary": "traz todas as consultas marcadas para um usuario",
+                "tags": ["Users"],
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "500": {
+                        "description": "server error",
+                        "message": "tirar print e enviar no email acima!"
+                    },
+                    "401": { "description": "unathorized" },
+                    "400": { "description": "Bad Request" },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "traz todos os usuarios",
+                "summary": "Traz todos os usuarios cadastrados",
+                "tags": ["Users"],
+                "security": [{ "bearerAuth": [] }],
+                "responses": {
+                    "500": {
+                        "description": "server error"
+                    },
+                    "401": { "description": "unathorized" },
+                    "400": { "description": "Bad Request" },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/Users"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "traz todos os usuarios",
+                "summary": "Traz todos os usuarios cadastrados",
+                "tags": ["Users"],
+                "security": [{ "bearerAuth": [] }],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            },
+                            "examples": {
+                                "usuario": {
+                                    "value": {
+                                        "nome": "meu nome é",
+                                        "email": "email@gmail.com.br",
+                                        "senha": "dbdf24vbf52f54",
+                                        "agenda": "23/09/2022 19:30",
+                                        "role": 0
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "500": {
+                        "description": "server error"
+                    },
+                    "401": { "description": "unathorized" },
+                    "400": { "description": "Bad Request" },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/Users"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "description": "traz o usuario pelo id",
+                "summary": "traz o usuario pelo id",
+                "tags": ["Users"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Usuario pelo id",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "server error"
+                    },
+                    "401": { "description": "unathorized" },
+                    "400": { "description": "Bad Request" },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/Users"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "traz o usuario pelo id",
+                "summary": "traz o usuario pelo id",
+                "tags": ["Users"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Usuario pelo id",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Users"
+                            },
+                            "examples": {
+                                "usuario": {
+                                    "value": {
+                                        "nome": "meu nome é",
+                                        "email": "email@gmail.com.br",
+                                        "senha": "dbdf24vbf52f54",
+                                        "agenda": "23/09/2022 19:30",
+                                        "role": 0
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "500": {
+                        "description": "server error"
+                    },
+                    "401": { "description": "unathorized" },
+                    "400": { "description": "Bad Request" },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/Users"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "traz o usuario pelo id",
+                "summary": "traz o usuario pelo id",
+                "tags": ["Users"],
+                "security": [{ "bearerAuth": [] }],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Usuario pelo id",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "server error"
+                    },
+                    "401": { "description": "unathorized" },
+                    "400": { "description": "Bad Request" },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "in": "header",
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "Login": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" },
+                    "email": { "type": "string" }
+                }
+            },
+            "Users": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" },
+                    "email": { "type": "string" },
+                    "agenda ": { "type": "string", "format": "date-time" },
+                    "senha": { "type": "string", "format": "password" },
+                    "role": { "type": "number" }
+                }
+            }
+        }
+    }
+}
