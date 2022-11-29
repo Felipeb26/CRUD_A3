@@ -1,16 +1,11 @@
 {
-    "name": "back-a3",
     "version": 2,
     "build": {
-        "src": "./src/server.js",
+        "src": "./server.js",
         "use": "@vercel/node"
     },
     "routes": [{
         "src": "/(.*)",
         "dest": "/"
-    }],
-    "rewrites": [{
-        "source": "/dist/(.*)",
-        "destination": "/api"
     }]
 }
