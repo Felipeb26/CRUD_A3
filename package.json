@@ -4,7 +4,7 @@
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
-		"start": "yarn run build && node functions/server.js",
+		"start": "yarn run build && node api/server.js",
 		"build": "tsc --build tsconfig.json",
 		"dev": "nodemon --exec ts-node src/server.ts",
 		"begin": "yarn build && yarn start ",
