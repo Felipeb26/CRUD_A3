@@ -7,6 +7,7 @@ var StatusCode;
     StatusCode[StatusCode["CREATED"] = 201] = "CREATED";
     StatusCode[StatusCode["ACEPTED"] = 202] = "ACEPTED";
     StatusCode[StatusCode["BAD_REQUEST"] = 400] = "BAD_REQUEST";
+    StatusCode[StatusCode["FORBIDDEN"] = 403] = "FORBIDDEN";
     StatusCode[StatusCode["NOT_FOUND"] = 404] = "NOT_FOUND";
     StatusCode[StatusCode["SERVER_ERROR"] = 500] = "SERVER_ERROR";
 })(StatusCode = exports.StatusCode || (exports.StatusCode = {}));

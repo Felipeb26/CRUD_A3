@@ -2,6 +2,7 @@ import { db } from "../config/firebase";
 import { Medicos } from "../model/medico.model";
 import { anyToDate, ifNullNewValue, verifyRoles } from "../utils/constraints.utils";
 import { generateToken } from "../utils/token.utils";
+import { StatusCode } from './../enum/code.error';
 import { Usuarios } from './../model/usuariosmodel.';
 
 const usuariosCollections = db.collection("usuarios")
@@ -99,168 +100,165 @@ export class UsuariosController {
     };
 
     getAllUsers = async (req: any, res: any) => {
-        const data = usuariosCollections.orderBy("agenda", "asc")
-        const get = await data.get();
-
-        const users: any = []
+        const id = req.params.id;
         try {
-            if (!get.empty) {
-                get.docs.forEach((it) => {
+            if (id == null || undefined) {
+                const data = usuariosCollections.orderBy("agenda", "asc")
+                const get = await data.get();
+
+                const users: any = []
+                if (!get.empty) {
+                    get.docs.forEach((it) => {
+                        const user = new Usuarios(
+                            it.id,
+                            it.data().nome,
+                            it.data().telefone,
+                            it.data().email,
+                            it.data().senha,
+                            anyToDate(it.data().agenda),
+                            it.data().role,
+                        )
+                        users.push(user)
+                    })
+                    return res.send(users)
+                }
+            } else {
+                const it = await usuariosCollections.doc(id).get();
+                if (!it.exists) {
+                    res.status(404).send({ message: "usuarios não existe" });
+                } else {
+                    const user = new Usuarios(
+                        it.id,
+                        it.data()!.nome,
+                        it.data()!.telefone,
+                        it.data()!.email,
+                        it.data()!.senha,
+                        anyToDate(it.data()!.agenda),
+                        it.data()!.role,
+                    )
+                    res.send(user);
+                }
+            }
+        } catch (error: any) {
+            return res.status(StatusCode.SERVER_ERROR).send({ message: error.message });
+        }
+    }
+
+    DelPutPost = async (req: any, res: any) => {
+        if (req.method == "GET") {
+            return res.status(StatusCode.FORBIDDEN).send("method not allowed")
+        }
+        if (req.method == "POST") {
+            try {
+                const errorsList: Array<any> = []
+                let { nome, telefone, email, senha, agenda, role } = req.body;
+                if (nome == null || undefined && telefone == null || undefined && email == null || undefined
+                    && senha == null || undefined && role == null || undefined) {
+                    return res.status(400).send({ message: "todos os campos devem ser preenchidos" })
+                }
+
+                if (agenda == null || undefined) {
+                    agenda = Date.now()
+                }
+
+                const users: Usuarios[] = []
+                const request = await usuariosCollections.get();
+                request.docs.forEach(it => {
                     const user = new Usuarios(
                         it.id,
                         it.data().nome,
                         it.data().telefone,
                         it.data().email,
                         it.data().senha,
-                        anyToDate(it.data().agenda),
+                        it.data().agenda,
                         it.data().role,
-                    )
-                    users.push(user)
+                    );
+                    users.push(user);
                 })
-                return res.send(users)
+
+                users.forEach(it => {
+                    if (it.getEmail() == email) {
+                        errorsList.push(`Email: ${email} já foi cadastrado!`)
+                    }
+                    if (it.getAgenda() == agenda) {
+                        errorsList.push(`Data: ${agenda} não pode ser selecionada`)
+                    }
+                    if (it.getTelefone() == telefone) {
+                        errorsList.push(`Telefone: ${telefone} já foi cadastrado`)
+                    }
+                })
+
+                if (errorsList.length > 0) {
+                    return res.status(400).send(errorsList)
+                }
+
+                role = verifyRoles(role);
+                const user = {
+                    "nome": nome,
+                    "telefone": telefone,
+                    "email": email,
+                    "senha": senha,
+                    "agenda": agenda,
+                    "role": role
+                }
+
+                await usuariosCollections.doc().set(user);
+                return res.status(201).send(user);
+            } catch (error: any) {
+                console.log(error.message);
+                return res.status(StatusCode.SERVER_ERROR).send(error.message);
+
             }
-        } catch (error: any) {
-            return res.status(400).send({ message: error.message });
+        }
+        if (req.method == "PUT") {
+            try {
+                const id = req.params.id;
+                let { nome, telefone, email, senha, agenda, role } = req.body;
+
+                const data = await usuariosCollections.doc(id).get();
+
+                if (!data.exists) {
+                    return res.status(404).send({ message: "usuario não encontrado" })
+                }
+                const user = new Usuarios(
+                    data.id,
+                    data.data()!.nome,
+                    data.data()!.telefone,
+                    data.data()!.email,
+                    data.data()!.senha,
+                    data.data()!.agenda,
+                    data.data()!.role)
+
+                nome = ifNullNewValue(nome, user.getNome())
+                telefone = ifNullNewValue(telefone, user.getTelefone())
+                email = ifNullNewValue(email, user.getEmail())
+                senha = ifNullNewValue(senha, user.getSenha())
+                agenda = ifNullNewValue(agenda, user.getAgenda())
+                role = ifNullNewValue(role, user.getRole())
+
+                const userUpdate = {
+                    "nome": nome,
+                    "telefone": telefone,
+                    "email": email,
+                    "senha": senha,
+                    "agenda": agenda,
+                    "role": role
+                }
+
+                await usuariosCollections.doc(id).update(userUpdate);
+                return res.status(202).send(userUpdate);
+            } catch (error: any) {
+                return res.status(StatusCode.SERVER_ERROR).send({ message: error.message });
+            }
+        }
+        if (req.method == "DELETE") {
+            try {
+                const id = req.params.id;
+                await usuariosCollections.doc(id).delete();
+                res.send({ message: "Usuario deletado com sucesso!!" });
+            } catch (error: any) {
+                res.status(400).send({ message: error.message });
+            }
         }
     }
-
-    getById = async (req: any, res: any) => {
-        try {
-            const id = req.params.id;
-            const it = await usuariosCollections.doc(id).get();
-            if (!it.exists) {
-                res.status(404).send({ message: "usuarios não existe" });
-            } else {
-                const user = new Usuarios(
-                    it.id,
-                    it.data()!.nome,
-                    it.data()!.telefone,
-                    it.data()!.email,
-                    it.data()!.senha,
-                    anyToDate(it.data()!.agenda),
-                    it.data()!.role,
-                )
-                res.send(user);
-            }
-        } catch (error: any) {
-            res.status(400).send({ message: error.message });
-        }
-    };
-
-    addUser = async (req: any, res: any) => {
-        try {
-            const errorsList: Array<any> = []
-            let { nome, telefone, email, senha, agenda, role } = req.body;
-            if (nome == null || undefined && telefone == null || undefined && email == null || undefined
-                && senha == null || undefined && role == null || undefined) {
-                return res.status(400).send({ message: "todos os campos devem ser preenchidos" })
-            }
-
-            if (agenda == null || undefined) {
-                agenda = Date.now()
-            }
-
-            const users: Usuarios[] = []
-            const request = await usuariosCollections.get();
-            request.docs.forEach(it => {
-                const user = new Usuarios(
-                    it.id,
-                    it.data().nome,
-                    it.data().telefone,
-                    it.data().email,
-                    it.data().senha,
-                    it.data().agenda,
-                    it.data().role,
-                );
-                users.push(user);
-            })
-
-            users.forEach(it => {
-                if (it.getEmail() == email) {
-                    errorsList.push(`Email: ${email} já foi cadastrado!`)
-                }
-                if (it.getAgenda() == agenda) {
-                    errorsList.push(`Data: ${agenda} não pode ser selecionada`)
-                }
-                if (it.getTelefone() == telefone) {
-                    errorsList.push(`Telefone: ${telefone} já foi cadastrado`)
-                }
-            })
-
-            if (errorsList.length > 0) {
-                return res.status(400).send(errorsList)
-            }
-
-            role = verifyRoles(role);
-
-            const user = {
-                "nome": nome,
-                "telefone": telefone,
-                "email": email,
-                "senha": senha,
-                "agenda": agenda,
-                "role": role
-            }
-
-            await usuariosCollections.doc().set(user);
-            return res.status(201).send(user);
-
-        } catch (error: any) {
-            console.log(error.message)
-        }
-
-    }
-
-    updateUser = async (req: any, res: any) => {
-        try {
-            const id = req.params.id;
-            let { nome, telefone, email, senha, agenda, role } = req.body;
-
-            const data = await usuariosCollections.doc(id).get();
-
-            if (!data.exists) {
-                return res.status(404).send({ message: "usuario não encontrado" })
-            }
-            const user = new Usuarios(
-                data.id,
-                data.data()!.nome,
-                data.data()!.telefone,
-                data.data()!.email,
-                data.data()!.senha,
-                data.data()!.agenda,
-                data.data()!.role)
-
-
-            nome = ifNullNewValue(nome, user.getNome())
-            telefone = ifNullNewValue(telefone, user.getTelefone())
-            email = ifNullNewValue(email, user.getEmail())
-            senha = ifNullNewValue(senha, user.getSenha())
-            agenda = ifNullNewValue(agenda, user.getAgenda())
-            role = ifNullNewValue(role, user.getRole())
-
-            const userUpdate = {
-                "nome": nome,
-                "telefone": telefone,
-                "email": email,
-                "senha": senha,
-                "agenda": agenda,
-                "role": role
-            }
-
-            await usuariosCollections.doc(id).update(userUpdate);
-            return res.status(202).send(userUpdate);
-        } catch (error: any) {
-            return res.status(400).send({ message: error.message });
-        }
-    };
-
-    deleteUser = async (req: any, res: any) => {
-        try {
-            const id = req.params.id;
-            await usuariosCollections.doc(id).delete();
-            res.send({ message: "Usuario deletado com sucesso!!" });
-        } catch (error: any) {
-            res.status(400).send({ message: error.message });
-        }
-    };
 }

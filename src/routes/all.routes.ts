@@ -9,23 +9,13 @@ const user = new UsuariosController()
 const doc = new MedicoController();
 
 //endpoints referentes ao usuario
-route.get("/users", authUser, user.getAllUsers);
+route.get("/users/:id?", authUser, user.getAllUsers);
 
 route.post("/login", user.getUserForLogin);
 
-route.get("/user/:id", authUser, user.getById);
-
-route.post("/users", user.addUser);
-
-route.put("/user/:id", authUser, user.updateUser);
-
-route.delete("/user/:id", authUser, user.deleteUser);
+route.all("/user/:id", authUser, user.DelPutPost);
 
 // endpoints referente ao medico
-route.get("/docs", authUser, doc.getAllDocs);
+route.get("/docs/:id?", authUser, doc.getAllDocs);
 
-route.post("/docs", user.addUser);
-
-route.put("/docs/:id", authUser, doc.updateUser);
-
-route.delete("/docs/:id", authUser, user.deleteUser);
+route.all("/doc/:id?", authUser, doc.DelPutPost)
