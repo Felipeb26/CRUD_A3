@@ -98,65 +98,6 @@ export class UsuariosController {
         }
     };
 
-    getAllPaginate = async (req: any, res: any, next: any) => {
-        try {
-            let limit = req.query.limit || 10;
-            let after = req.query.after;
-            let before = req.query.before;
-            let view = req.query.view || "agenda";
-            limit = parseInt(limit);
-
-            let data = usuariosCollections.orderBy(view, "asc");
-
-            if (after) {
-                data = data.startAfter(after).limit(limit);
-            } else if (before) {
-                data = data.endBefore(before).limit(limit);
-            } else {
-                data = data.limit(limit);
-            }
-
-            const snapshots = await data.get();
-            const userList: Usuarios[] = [];
-
-            if (snapshots.empty) {
-                res.send(400).send({ message: "sem usuarios cadastrados" });
-            } else {
-                snapshots.forEach((it) => {
-                    const user = new Usuarios(
-                        it.id,
-                        it.data().nome,
-                        it.data().telefone,
-                        it.data().email,
-                        it.data().senha,
-                        it.data().agenda,
-                        it.data().role,
-                    )
-                    userList.push(user);
-                });
-            }
-
-            const content = {
-                users: userList,
-                pagination: {
-                    prev:
-                        userList.length > 0 && (after || before)
-                            ? userList[0].getAgenda()
-                            : null,
-                    next:
-                        userList.length == limit
-                            ? userList[userList.length - 1].getAgenda()
-                            : null,
-                    totalElements: userList.length,
-                },
-            };
-
-            return res.status(200).send(content);
-        } catch (error: any) {
-            return res.status(400).send({ message: error.message });
-        }
-    };
-
     getAllUsers = async (req: any, res: any) => {
         const data = usuariosCollections.orderBy("agenda", "asc")
         const get = await data.get();
@@ -181,64 +122,6 @@ export class UsuariosController {
         } catch (error: any) {
             return res.status(400).send({ message: error.message });
         }
-    }
-
-    getAllConsultas = async (req: any, res: any) => {
-        const medicos = medicosCollections.orderBy("agenda", "asc");
-        const usuarios = usuariosCollections.orderBy("agenda", "asc");
-
-        const medicoGet = await medicos.get();
-        const usuarioGet = await usuarios.get();
-        try {
-            if (medicoGet.empty && usuarioGet.empty) {
-                return res.status(500).send({ erro: "erro" })
-            }
-            const usersList: Usuarios[] = [];
-            const medicosList: Medicos[] = [];
-
-            usuarioGet.docs.forEach((it) => {
-                const user = new Usuarios(
-                    it.id,
-                    it.data().nome,
-                    it.data().telefone,
-                    it.data().email,
-                    it.data().senha,
-                    anyToDate(it.data().agenda),
-                    it.data().role,
-                )
-                usersList.push(user)
-            });
-
-            medicoGet.docs.forEach((it) => {
-                const medico = new Medicos(
-                    it.id,
-                    it.data().nome,
-                    it.data().telefone,
-                    it.data().email,
-                    it.data().senha,
-                    anyToDate(it.data().agenda),
-                    it.data().role,
-                    it.data().crm,
-                    it.data().especialidade
-                );
-                medicosList.push(medico);
-            });
-
-            const dates: Array<string> = []
-            const doctors: Medicos[] = []
-            usersList.forEach(it => dates.push(it.getAgenda()))
-
-            for (let i = 0; i < dates.length; i++) {
-                const doc = medicosList.filter(it => it.getAgenda() == dates[i])
-                for (let m = 0; m < doc.length; m++) {
-                    doctors.push(doc[i]);
-                }
-            }
-            return res.status(200).send(doctors);
-        } catch (erro: any) {
-            return res.status(400).send({ message: erro.message });
-        }
-
     }
 
     getById = async (req: any, res: any) => {

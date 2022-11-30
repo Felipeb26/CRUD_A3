@@ -31,30 +31,30 @@ export class MedicoController {
         }
     }
 
-    getById = async (req: any, res: any) => {
-        try {
-            const id = req.params.id;
-            const it = await medicosTable.doc(id).get();
-            if (!it.exists) {
-                res.status(404).send({ message: "usuarios não existe" });
-            } else {
-                const medico = new Medicos(
-                    it.id,
-                    it.data()!.nome,
-                    it.data()!.telefone,
-                    it.data()!.email,
-                    it.data()!.senha,
-                    it.data()!.agenda,
-                    it.data()!.role,
-                    it.data()!.crm,
-                    it.data()!.especialidade
-                );
-                return res.send(medico);
-            }
-        } catch (error: any) {
-            res.status(400).send({ message: error.message });
-        }
-    };
+    // getById = async (req: any, res: any) => {
+    //     try {
+    //         const id = req.params.id;
+    //         const it = await medicosTable.doc(id).get();
+    //         if (!it.exists) {
+    //             res.status(404).send({ message: "usuarios não existe" });
+    //         } else {
+    //             const medico = new Medicos(
+    //                 it.id,
+    //                 it.data()!.nome,
+    //                 it.data()!.telefone,
+    //                 it.data()!.email,
+    //                 it.data()!.senha,
+    //                 it.data()!.agenda,
+    //                 it.data()!.role,
+    //                 it.data()!.crm,
+    //                 it.data()!.especialidade
+    //             );
+    //             return res.send(medico);
+    //         }
+    //     } catch (error: any) {
+    //         res.status(400).send({ message: error.message });
+    //     }
+    // };
 
     addUser = async (req: any, res: any) => {
         try {
