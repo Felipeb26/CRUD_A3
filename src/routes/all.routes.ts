@@ -13,7 +13,7 @@ route.get("/users/:id?", authUser, user.getAllUsers);
 
 route.post("/login", user.getUserForLogin);
 
-route.all("/user/:id", authUser, user.DelPutPost);
+route.all("/user/:id?", authUser, user.DelPutPost);
 
 // endpoints referente ao medico
 route.get("/docs/:id?", authUser, doc.getAllDocs);
